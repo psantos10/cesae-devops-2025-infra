@@ -7,8 +7,8 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "eu-west-1"
+resource "aws_s3_bucket" "bucket" {
+  bucket = var.bucket_name
 }
 
 resource "aws_security_group" "securitygroup01" {
