@@ -1,0 +1,20 @@
+name: "DEV DEPLOY"
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    uses: ./.github/workflows/terraform.yaml
+    with:
+      environment: develop
+      aws-assume-role-arn: "arn:aws:iam::685175429594:role/github-actions-psantos10-cesae-devops-2025"
+      aws-region: "eu-west-1"
+      aws-statefile-s3-bucket: "psantos10-eu-west-1-cesae-devops-2025"
+      aws-lock-dynamodb-table: "psantos10-eu-west-1-cesae-devops-2025-terraform-lock"

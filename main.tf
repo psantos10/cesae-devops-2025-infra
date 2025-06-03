@@ -7,55 +7,26 @@ terraform {
   }
 }
 
-resource "aws_s3_bucket" "bucket" {
-  bucket = var.bucket_name
+# Módulo para o S3 Bucket
+module "s3_bucket" {
+  source      = "./modules/s3_bucket"
+  bucket_name = var.bucket_name
 }
 
-resource "aws_security_group" "securitygroup01" {
-  name        = "securitygroup01"
+# Módulo para o Security Group
+module "security_group" {
+  source      = "./modules/security_group"
+  name        = var.security_group_name
   description = "Acesso SSH, HTTP, HTTPS e Internet"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "SSH access"
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTP access"
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTPS access"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
-resource "aws_key_pair" "keypair" {
-  key_name   = "psantos-keypair"
-  public_key = file("sshkeys/psantos.pub")
+# Módulo para a instância EC2
+module "ec2_instance" {
+  source            = "./modules/ec2_instance"
+  instance_ami      = var.instance_ami
+  instance_type     = var.instance_type
+  security_group_id = module.security_group.id
+  key_name          = var.key_name
+  user_data_script  = var.user_data_script
 }
 
-resource "aws_instance" "servidor01" {
-  ami                    = "ami-0df368112825f8d8f"
-  instance_type          = "t2.nano"
-  user_data              = file("user_data.sh")
-  key_name               = aws_key_pair.keypair.key_name
-  vpc_security_group_ids = [aws_security_group.securitygroup01.id]
-}
